@@ -1,44 +1,50 @@
 define(['jquery',
-	'underscore',
-	'backbone',
-	'goatApp/controller/LessonController',
-	'goatApp/controller/MenuController',
-	'goatApp/view/LessonContentView',
-	'goatApp/view/MenuView'
-	], function ($,_,Backbone,LessonController,MenuController,LessonContentView,MenuView) {
+    'underscore',
+    'backbone',
+    'goatApp/controller/LessonController',
+    'goatApp/controller/MenuController',
+    'goatApp/view/LessonContentView',
+    'goatApp/view/MenuView',
+    'goatApp/view/TitleView'
+], function ($,_,Backbone,LessonController,MenuController,LessonContentView,MenuView,TitleView) {
 
-		var lessonView = new LessonContentView();
-		var menuView = new MenuView(); 
-		var GoatAppRouter = Backbone.Router.extend({
-			routes: {
-				//#....
-				'welcome':'welcomeRoute',
-				'attack/:scr/:menu':'attackRoute' //	
-			},
-			lessoonController: lessoonController({
-				lessonView:lessonView
-			}),
-			menuView: new MenuController({
-				menuView:menuView
-			})
-		});
+    var lessonView = new LessonContentView();
+    var menuView = new MenuView();
+    var titleView = new TitleView();
 
-		var init = function() {
-			goatRouter =  new GoatAppRouter();
+    var GoatAppRouter = Backbone.Router.extend({
+        routes: {
+            //#....
+            'welcome':'welcomeRoute',
+            'attack/:scr/:menu':'attackRoute' //
+        },
+        lessonController: new LessonController({
+            lessonView:lessonView
+        }),
+        menuController: new MenuController({
+            menuView:menuView,
+            titleView:titleView
+        }),
 
-			goatRouter.on('route:attackRoute', function(scr,menu) {
-				this.lessonController.loadLesson(scr,menu);
-				//update menu
-			});
-			goatRouter.on('route:welcomeRoute', function() {
-				alert('welcome route');
-			});
-			// init the history/router
-			Backbone.history.start();
-		}
+        init:function() {
+            goatRouter =  new GoatAppRouter();
+            this.lessonController.start();
+            this.menuController.initMenu();
 
-		return {
-			init:init
-		};
+            goatRouter.on('route:attackRoute', function(scr,menu) {
+                console.log('attack route');
+                this.lessonController.loadLesson(scr,menu);
+                this.menuController.updateMenu(scr,menu);
+                //update menu
+            });
+            goatRouter.on('route:welcomeRoute', function() {
+                alert('welcome route');
+            });
+
+            Backbone.history.start();
+        }
+    });
+
+    return GoatAppRouter;
 
 });
